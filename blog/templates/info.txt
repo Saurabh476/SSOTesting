@@ -1,0 +1,2 @@
+{% %} : for logic code block like if, for 
+{{ }} : for accesing variable

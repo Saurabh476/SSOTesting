@@ -1,0 +1,41 @@
+
+
+#      python manage.py makemigrations 
+
+this creates a new 0001_initial.py file in migrations
+migrations are useful because it allows us to make changes to database
+even after it already has content in database
+so we can make changes are then make migrate and all changes 
+will be made in new database
+
+
+#       python manage.py migrate
+this integrates the already created table with our new table
+
+#       from blog.models import Post
+this command import our database models
+
+#       from django.contrib.auth.models import User
+this imports User table
+
+#       User.objects.all()
+returns query set of all users
+
+#       User.objects.filter(username="saurabhtelure")
+this returns query with username as specified
+
+#       User.objects.filter(username="saurabhtelure").first()
+this returns only the first username
+
+user.id, user.pk is the primary key of user
+
+#       user = User.objects.filter(id=1)  
+this returns the user with id=1
+
+
+
+#       post_1 = Post(title='Blog 1', content='First post content', author=user)
+#       post_1.save()
+# these enters entry to database
+
+
