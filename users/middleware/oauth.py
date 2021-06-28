@@ -10,29 +10,86 @@ from users import views
 class OAuthMiddleware(MiddlewareMixin):
 
     def __init__(self, get_response=None):
-        print("******** function1 ***********")
         super().__init__(get_response)
         self.oauth = OAuth()
 
-    def process_request(self, request):
-        print("******** function2 ***********")
-        if settings.OAUTH_URL_WHITELISTS is not None:
-            for w in settings.OAUTH_URL_WHITELISTS:
-                if request.path.startswith(w):
-                    return self.get_response(request)
+    # def process_request(self, request):
+    #     if settings.OAUTH_URL_WHITELISTS is not None:
+    #         for w in settings.OAUTH_URL_WHITELISTS:
+    #             # print('Inside 2.3 SSO',request.path)
+    #             if request.path.startswith(w):
+    #                 # print("******** function2.3 ***********")
+    #                 # print(request.path_info)
+    #                 # print(request.GET['code'])
+    #                 print(self.get_response(request))
+    #                 return self.get_response(request)
 
-        def update_token(token, refresh_token, access_token):
+    #     def update_token(token, refresh_token, access_token):
+    #         print(token,"this is update token")
+    #         request.session['token'] = token
+    #         return None
+    #     print("Before sso client",request.path_info)
+    #     sso_client = self.oauth.register(
+    #         settings.OAUTH_CLIENT_NAME, overwrite=True, **settings.OAUTH_CLIENT, update_token=update_token
+    #     )
+    #     print('After SSO',request.path)
+    #     if request.path.startswith('/profile'):
+    #         self.clear_session(request)
+    #         request.session['token'] = sso_client.authorize_access_token(request)
+    #         print("******************request session******************")
+    #         if self.get_current_user(sso_client, request) is not None:
+    #             redirect_uri = request.session.pop('redirect_uri', None)
+    #             if redirect_uri is not None:
+    #                 return redirect(redirect_uri)
+    #             return redirect(views.index)
 
+    #     if request.session.get('token', None) is not None:
+    #         current_user = self.get_current_user(sso_client, request)
+    #         if current_user is not None:
+    #             return self.get_response(request)
+
+    #     # remember redirect URI for redirecting to the original URL.
+    #     request.session['redirect_uri'] = request.path
+    #     return sso_client.authorize_redirect(request, settings.OAUTH_CLIENT['redirect_uri'])
+
+    # # fetch current login user info
+    # # 1. check if it's in cache
+    # # 2. fetch from remote API when it's not in cache
+    # @staticmethod
+    def update_token(token, refresh_token, access_token):
+            print(token,"this is update token")
             request.session['token'] = token
             return None
+    def process_request(self, request):
+        if settings.OAUTH_URL_WHITELISTS is not None:
+            for w in settings.OAUTH_URL_WHITELISTS:
+                # print('Inside 2.3 SSO',request.path)
+                if request.path.startswith(w):
+                    # print("******** function2.3 ***********")
+                    # print(request.path_info)
+                    # print(request.GET['code'])
+                    print(self.get_response(request))
 
-        sso_client = self.oauth.register(
-            settings.OAUTH_CLIENT_NAME, overwrite=True, **settings.OAUTH_CLIENT, update_token=update_token
-        )
+        
+                    print("Before sso client",request.path_info)
+                    sso_client = self.oauth.register(
+                        settings.OAUTH_CLIENT_NAME, overwrite=True, **settings.OAUTH_CLIENT, update_token=self.update_token
+                    )
+                    print('After SSO',request.path)
+                    if request.path.startswith('/profile'):
+                        self.clear_session(request)
+                        request.session['token'] = sso_client.authorize_access_token(request)
+                        print("******************request session******************")
+                        if self.get_current_user(sso_client, request) is not None:
+                            print(self.get_current_user(sso_client,request))
+                            return self.get_response(request)
 
-        if request.path.startswith('/oauth/callback'):
+        sso_client = self.oauth.register(settings.OAUTH_CLIENT_NAME, overwrite=True, **settings.OAUTH_CLIENT, update_token=self.update_token)
+        print('After SSO',request.path)
+        if request.path.startswith('/profile'):
             self.clear_session(request)
             request.session['token'] = sso_client.authorize_access_token(request)
+            print("******************request session******************")
             if self.get_current_user(sso_client, request) is not None:
                 redirect_uri = request.session.pop('redirect_uri', None)
                 if redirect_uri is not None:
@@ -47,15 +104,14 @@ class OAuthMiddleware(MiddlewareMixin):
         # remember redirect URI for redirecting to the original URL.
         request.session['redirect_uri'] = request.path
         return sso_client.authorize_redirect(request, settings.OAUTH_CLIENT['redirect_uri'])
-
     # fetch current login user info
     # 1. check if it's in cache
     # 2. fetch from remote API when it's not in cache
     @staticmethod
     def get_current_user(sso_client, request):
         token = request.session.get('token', None)
-        print("****************"+ token + "***************")
         if token is None or 'access_token' not in token:
+            print("Inside if get_current_user")
             return None
 
         if not OAuth2Token.from_dict(token).is_expired() and 'user' in request.session:

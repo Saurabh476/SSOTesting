@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponse
 from .forms import UserRegisterForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -6,7 +6,8 @@ from django.urls import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from .auth_backend import PasswordlessAuthBackend as plb
-
+from djangoTutorial import settings
+from .middleware.oauth import OAuthMiddleware
 # messages.success
 # messages.error
 # messages.warning
@@ -32,9 +33,17 @@ def register(request):
     return render(request,'users/register.html',{'form': form})
 
 # this is decorater which adds functionality
-# @login_required
+# def profile(request):
+#     print(render(request, 'users/profile.html'))
+#     return HttpResponse("This is normal profile page")
+
 def profile(request):
-    return render(request, 'users/profile.html')
+    userName = request.session['user']['login']
+    print("User name is : ", userName)
+    responseMessagpe = "User Name is : "+userName
+
+    
+    return HttpResponse(responseMessagpe)
 
 def login_user(request):
     plbObject = plb()

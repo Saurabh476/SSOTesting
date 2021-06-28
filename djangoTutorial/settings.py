@@ -141,19 +141,19 @@ AUTHENTICATION_BACKENDS = (
 # MICROSOFT_AUTH_AUTHENTICATE_HOOK = "django_app.aad.store_token"
 
 # OAuth Settings
-OAUTH_URL_WHITELISTS = []
+OAUTH_URL_WHITELISTS = ['/profile/']
 
 OAUTH_CLIENT_NAME = 'github'
 
 OAUTH_CLIENT = {
-    'client_id': 'c86e652bcbec0d6f1734',
-    'client_secret': 'f832c96b1c60d6dd6cf2a274fb1990e4f91e7d34',
+    'client_id': 'd3c6ff08bbc72dbad130',
+    'client_secret': '9355591d73a1eca907e09afde9d066e390bd2993',
     'access_token_url': 'https://github.com/login/oauth/access_token',
     'authorize_url': 'https://github.com/login/oauth/authorize',
     'api_base_url': 'https://api.github.com/',
-    'redirect_uri': 'https://www.google.com',
+    'redirect_uri': 'http://127.0.0.1:8000/profile/',
     'client_kwargs': {
-        'scope': 'profile email',
+        'scope': 'profile email ',
         'token_placement': 'header'
     },
     'userinfo_endpoint': 'user',
